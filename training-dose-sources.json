@@ -1,0 +1,92 @@
+{
+  "reviewedDate": "2026-10-30",
+  "scope": "仅更新训练剂量、动作库剂量资料与说明；营养、日期、调整和有氧公共接口保持原有行为。",
+  "retrieval": {
+    "firecrawl": "额度不足，未运行检索或抓取；改用 web 工具读取官方页面。"
+  },
+  "productDecisions": [
+    {
+      "decision": "按次数动作以每组10次起为目标；新手2组10次，已具基础者2–3组10–12次，单侧动作左右分别计数。",
+      "basis": "10次处于NHS常见8–12次范围内；这是界面执行目标，不是普遍最低安全线或人人必须完成的次数。"
+    },
+    {
+      "decision": "登山跑、高抬腿、开合跳改为按次数；平板支撑、侧平板、靠墙深蹲仍按20–30秒。",
+      "basis": "动态动作明确计数单位；静态动作按保持时间评估，不把秒数误写为重复次数。"
+    },
+    {
+      "decision": "起始组间休息60–120秒；俯卧撑与弓步90–120秒；小幅深蹲跳120秒。",
+      "basis": "依动作负担留出恢复，不把计时结束当作必须立即开练的指令；尚未恢复时允许延长至2–3分钟。"
+    },
+    {
+      "decision": "深蹲跳仅有基础且主动选择跳跃者，2组10次，小幅、不追跳高，落地不稳改普通深蹲10次或结束。",
+      "basis": "产品选择的小幅协调目标，不能归因为NASM最大爆发力训练处方。NASM最大爆发力方案为5–8次、充分休息并避免力竭；10次小幅目标仍需根据实际落地质量调整。"
+    },
+    {
+      "decision": "每个重复动作与全局计划中提示：10次起为目标，可降难度，动作走样时结束，不强凑次数。",
+      "basis": "依据动作质量与个人能力选择难度；膝撑、抬高手部、支撑物和更舒适的动作幅度均为可选降阶。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "NHS · How to improve your strength and flexibility",
+      "url": "https://www.nhs.uk/live-well/exercise/how-to-improve-strength-flexibility/",
+      "role": "专业依据",
+      "verified": "常见力量练习每组8–12次，至少2组，可做到3组；依能力调整。"
+    },
+    {
+      "title": "ACE · The ACE Workout Builder for Split Routines",
+      "url": "https://www.acefitness.org/continuing-education/certified/may-2024/8632/the-ace-workout-builder-for-split-routines/",
+      "role": "专业依据",
+      "verified": "训练目标、经验、强度对应不同的组数、次数和休息；一般肌力表给出8–15次及较长恢复，不能套用一个统一最佳休息值。"
+    },
+    {
+      "title": "Health and Wellbeing Queensland · High knees",
+      "url": "https://hw.qld.gov.au/physical-activity/high-knees/",
+      "role": "专业依据",
+      "verified": "推荐高抬腿每侧10–15次；可按需要扶稳固支撑保持平衡。"
+    },
+    {
+      "title": "NASM · Squat Jump",
+      "url": "https://www.nasm.org/resource-center/exercise-library/squat-jump",
+      "role": "专业依据与编排边界",
+      "verified": "最大爆发力训练每组5–8次、充分组间恢复；需先掌握基础力量、平衡和可控落地；疲劳会损害落地动作。"
+    },
+    {
+      "title": "ATHLEAN-X · How To Do Push-Ups",
+      "url": "https://learn.athleanx.com/articles/how-to-do-pushups",
+      "role": "博主本人官方网站的辅助动作教程",
+      "verified": "强调中立头颈、可控重复、动作质量优先；以标准10次为起步目标，能力不足可选择跪姿等修改动作。"
+    }
+  ],
+  "validation": {
+    "plansChecked": 2688,
+    "horizonDays": 56,
+    "trainDays": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "restDays": [
+      1,
+      2,
+      3
+    ],
+    "levels": [
+      "beginner",
+      "regular"
+    ],
+    "lowImpact": [
+      true,
+      false
+    ],
+    "firstDayBeginnerMinutes": 34,
+    "maxRegularMinutes": 52,
+    "commands": [
+      "node --check dist/engine.js",
+      "node --check dist/moves.js",
+      "node check-engine.cjs"
+    ],
+    "result": "passed"
+  }
+}

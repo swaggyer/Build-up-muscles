@@ -1,0 +1,21 @@
+Food icon sources
+
+Google Noto Emoji v2.047
+Copyright Google LLC.
+Icon family observed at: https://icon-icons.com/pack/noto-emoji-food-drink-icons/1447
+Egg detail reference: https://icon-icons.com/icon/egg-food/98878
+Official SVG source: https://github.com/googlefonts/noto-emoji/tree/v2.047/svg
+Official project licensing notes: https://github.com/googlefonts/noto-emoji/blob/v2.047/README.md
+Most image resources: Apache License 2.0 (included as food-noto-Apache-2.0.txt).
+The repository also includes SIL Open Font License 1.1 (included as food-noto-OFL.txt).
+The egg, milk, apple, banana, rice, bread, broccoli, sweet-potato, potato and orange SVGs are unmodified official image resources.
+The oats, chicken, tofu, salmon, yogurt and oil SVGs are original illustrations for this website, drawn to complement the food icon style. They are not downloaded icons.
+
+Nutrition data
+USDA National Nutrient Database for Standard Reference, Release 28, revised May 2016.
+Downloaded from: https://fdc.nal.usda.gov/fdc-datasets/SR-Legacy-Archive/sr28abbr.zip
+Energy values were checked in the official ABBREV.txt per 100g edible portion.
+Dataset descriptions are recorded in foods.js as sourceFood, sourceNdb and sourceDataset.
+Common serving sizes are adjustable interface examples, not fixed actual weights.
+
+2026-10-30 expansion: the 15 new food SVGs are original illustrations for this site. Nutrition sources and qualifications are recorded in food-directory-expansion-sources.txt and per-food metadata in foods.js.

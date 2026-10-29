@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.swaggyer.baojiboji'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.swaggyer.baojiboji'
+        minSdk 26
+        targetSdk 35
+        versionCode providers.gradleProperty('appVersionCode').getOrElse('1').toInteger()
+        versionName providers.gradleProperty('appVersionName').getOrElse('0.1.0')
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.preview'
+            versionNameSuffix '-preview'
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main.assets.srcDir layout.buildDirectory.dir('generated/web-assets')
+    }
+}
+
+// Every APK contains the current complete website. No remote website is used as its home page.
+tasks.register('syncWebAssets', Sync) {
+    from(rootProject.file('../dist'))
+    into(layout.buildDirectory.dir('generated/web-assets/web'))
+    exclude '**/*.apk', '**/*.zip'
+    doFirst {
+        if (!rootProject.file('../dist/index.html').isFile()) {
+            throw new GradleException('The dist/index.html website must exist before building Android.')
+        }
+    }
+}
+tasks.named('preBuild').configure { dependsOn 'syncWebAssets' }
+tasks.configureEach {
+    if (name.startsWith('merge') && name.endsWith('Assets')) dependsOn 'syncWebAssets'
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+    implementation 'androidx.core:core:1.13.1'
+}

@@ -1,0 +1,21 @@
+{
+  "reviewed_on": "2026-10-30",
+  "model": "Deterministic 3D joint kinematics, pelvis and femur-bound garment projection, fixed segment lengths and support contacts; no claim of full muscle-force dynamics.",
+  "moves": {
+    "squat": {"source":"https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/","checks":["hip and knee flexion together","heels stable","knees follow toe direction"]},
+    "pushup": {"source":"https://learn.athleanx.com/articles/how-to-do-pushups","checks":["head, trunk and heels aligned","controlled elbow flexion","natural downward gaze"]},
+    "lunge": {"source":"https://www.catalystathletics.com/exercise/735/Reverse-Lunge/","checks":["alternate backward step without added load","front foot remains planted","rear forefoot contact and raised heel"]},
+    "plank": {"source":"https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/","checks":["elbows below shoulders","neutral head and trunk","forearm and toe support"]},
+    "mountain-climber": {"source":"https://www.inclusivesport.gov.sg/learning-opportunities/resources/functional-fitness-exercises/","checks":["fixed hand support","alternate knee drive","stable pelvis"]},
+    "crunch": {"source":"https://www.acefitness.org/resources/everyone/exercise-library/52/crunch/","checks":["feet and pelvis remain supported","small shoulder-blade lift","no neck pulling"]},
+    "side-plank": {"source":"https://www.inclusivesport.gov.sg/learning-opportunities/resources/functional-fitness-exercises/","checks":["elbow below shoulder","stacked trunk and pelvis","no rotation to face camera"]},
+    "wall-sit": {"source":"https://www.nasm.org/resource-center/blog/training/wall-sits","checks":["back against wall","feet in front of pelvis","hold stable depth"]},
+    "side-leg-raise": {"source":"https://www.acefitness.org/resources/everyone/exercise-library/38/side-lying-hip-abduction/","checks":["stacked shoulders and pelvis","upper leg abducts independently","no pelvic roll"]},
+    "knee-pushup": {"source":"https://www.acefitness.org/resources/everyone/exercise-library/13/bent-knee-push-up/","checks":["shoulder, hip and knee alignment","hands and knees supported","controlled elbow flexion"]},
+    "shoulder-tap": {"source":"https://hawkesphysiotherapy.co.uk/exercise/plank-with-shoulder-taps/","checks":["wide stable feet","one hand touches opposite shoulder","pelvis resists rotation"]},
+    "russian-twist": {"source":"https://www.nasm.org/resource-center/exercise-library/russian-twist","checks":["feet remain grounded","small thoracic rotation","pelvis stays stable"]},
+    "jumping-jack": {"source":"https://hw.qld.gov.au/physical-activity/jumping-jacks/","checks":["arms and legs open together","constant body proportions","soft knee landing"]},
+    "high-knees": {"source":"https://hw.qld.gov.au/physical-activity/high-knees/","checks":["alternate hip flexion","weight transfers before foot lift","opposite arm swing"]},
+    "squat-jump": {"source":"https://www.nasm.org/resource-center/exercise-library/squat-jump","checks":["hip, knee and ankle extension","small flight phase","hip and knee absorb landing"]}
+  }
+}

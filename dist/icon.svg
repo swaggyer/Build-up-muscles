@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="暴击薄肌">
+  <rect width="64" height="64" rx="17" fill="#fa5d36"/>
+  <g fill="#ffcb9e">
+    <path d="M17 15c4-3 8-4 12-3v11c-4 1-8 0-12-2zm0 11c4 2 8 2 12 1v11c-4 1-7 0-11-2zm2 15c4 2 7 2 10 1v11c-5-1-8-6-10-10z"/>
+    <path d="M35 12c4-1 8 0 12 3v6c-4 2-8 3-12 2zm0 15c4 1 8 1 12-1l-1 10c-4 2-7 3-11 2zm0 15c3 1 6 1 10-1v2c-2 4-5 9-10 10z"/>
+  </g>
+  <path d="m40 7-18 26h11l-6 24 25-34H40l7-16z" fill="#fff4d2" stroke="#e84c2d" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>
