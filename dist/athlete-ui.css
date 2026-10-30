@@ -6,3 +6,5 @@
 @media(max-width:540px){.hero{min-height:230px}.hero h2{font-size:29px;line-height:1.5;margin:4px 0 22px}.hero .primary-button{font-size:10px;padding:10px 11px}.hero-copy{width:58%}.hero-art{width:46%;padding-top:4px;padding-bottom:4px}.page-heading>h1{font-size:25px}.buddy-choice-row{padding:12px}.side-about{display:none}}
 
 .brand img.brand-mark{display:block;width:44px;height:44px;padding:0;background:none;border-radius:12px;object-fit:contain;flex-shrink:0}.mobile-brand{align-items:center;gap:8px}.mobile-brand img{display:block;width:32px;height:32px;object-fit:contain}@media(max-width:1000px){.mobile-brand{display:flex}}
+
+.static-pose-caption{font-size:12px;line-height:1.9;padding:12px 14px;background:#f0f3e7;border-radius:10px;color:#627c4c}.model-views-link{display:block;margin-top:5px}.model-views-stage svg{display:block;width:100%;height:auto}.model-views-stage{overflow:auto}@media(max-width:540px){.topbar-right .place-switch{display:none}}

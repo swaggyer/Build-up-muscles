@@ -17,7 +17,7 @@ assert.match(activity, /setAllowFileAccess\(false\)/);
 assert.match(activity, /MIXED_CONTENT_NEVER_ALLOW/);
 assert.match(manifest, /usesCleartextTraffic="false"/);
 const permissions = Array.from(manifest.matchAll(/<uses-permission[^>]+android:name="([^"]+)"/g), match => match[1]);
-assert.deepEqual(permissions, ['android.permission.INTERNET']);
+assert.deepEqual(permissions, ['android.permission.INTERNET','android.permission.REQUEST_INSTALL_PACKAGES']);
 assert.ok(!activity.includes('addJavascriptInterface'));
 assert.match(activity, /MediaStore\.ACTION_IMAGE_CAPTURE/);
 assert.match(activity, /FileProvider\.getUriForFile/);

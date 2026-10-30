@@ -31,9 +31,10 @@ fs.writeFileSync('../vector-kinematic-checks.json',JSON.stringify(report,null,2)
 if(process.argv.includes('--render')){
  const sharp=require(process.env.SHARP_MODULE_PATH || 'sharp');
  sharp.cache(false);sharp.concurrency(1);
- (async()=>{for(let group=0;group<Math.ceil(ids.length/3);group++){
-  const parts=[];for(let j=0;j<3&&group*3+j<ids.length;j++)for(let c=0;c<2;c++)for(let f=0;f<4;f++){const image=await sharp(Buffer.from(render(ids[group*3+j],c?'patrick':'spongebob',f))).png().toBuffer();parts.push({input:image,left:f*480,top:(j*2+c)*360});}
-  await sharp({create:{width:1920,height:2160,channels:4,background:'#F5F1E8'}}).composite(parts).png().toFile(`../vector-review-${group+1}.png`);
+ (async()=>{for(const c of ['spongebob','patrick']){await sharp(Buffer.from(context.window.renderAthleteModelViews(c))).png().toFile(`../athlete-model-${c}.png`);}
+ for(let group=0;group<2;group++){
+  const parts=[];for(let j=0;j<5;j++)for(let c=0;c<2;c++){const image=await sharp(Buffer.from(render(ids[group*5+j],c?'patrick':'spongebob'))).png().toBuffer();parts.push({input:image,left:c*480,top:j*360});}
+  await sharp({create:{width:960,height:1800,channels:4,background:'#F5F1E8'}}).composite(parts).png().toFile(`../athlete-static-review-${group+1}.png`);
  }
  })().catch(e=>{console.error(e);process.exitCode=1});
 }

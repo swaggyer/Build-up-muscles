@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "modelId": "Xenova/clip-vit-base-patch32",
+  "revision": "6b7c523703ae26e39be4b03774966f8571c7f523",
+  "dtype": "q8",
+  "packages": [
+    {
+      "name": "@huggingface/transformers",
+      "version": "3.8.1",
+      "url": "https://registry.npmjs.org/@huggingface/transformers/-/transformers-3.8.1.tgz",
+      "integrity": "sha512-tsTk4zVjImqdqjS8/AOZg2yNLd1z9S5v+7oUPpXaasDRwEDhB+xnglK1k5cad26lL5/ZIaeREgWWy0bs9y9pPA==",
+      "files": [
+        {
+          "entry": "package/dist/transformers.min.js",
+          "path": "vendor/food-model/transformers.min.js",
+          "bytes": 888173,
+          "sha256": "aa5002b70e789798da263f5f99c62bd3e8fcd0c119258a493c40c180648365fa"
+        },
+        {
+          "entry": "package/dist/ort-wasm-simd-threaded.jsep.mjs",
+          "path": "vendor/food-model/ort-wasm-simd-threaded.jsep.mjs",
+          "bytes": 44484,
+          "sha256": "08fb86ec433c78bfb032c5d84a68b8e8e5a8d81268fa39e24314179a5767a5b9"
+        },
+        {
+          "entry": "package/dist/ort-wasm-simd-threaded.jsep.wasm",
+          "path": "vendor/food-model/ort-wasm-simd-threaded.jsep.wasm",
+          "bytes": 21596019,
+          "sha256": "c46655e8a94afc45338d4cb2b840475f88e5012d524509916e505079c00bfa39"
+        },
+        {
+          "entry": "package/LICENSE",
+          "path": "vendor/food-model/transformers-LICENSE.txt",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "onnxruntime-web",
+      "version": "1.22.0-dev.20250409-89f8206ba4",
+      "url": "https://registry.npmjs.org/onnxruntime-web/-/onnxruntime-web-1.22.0-dev.20250409-89f8206ba4.tgz",
+      "integrity": "sha512-0uS76OPgH0hWCPrFKlL8kYVV7ckM7t/36HfbgoFw6Nd0CZVVbQC4PkrR8mBX8LtNUFZO25IQBqV2Hx2ho3FlbQ==",
+      "files": [
+        {
+          "entry": "package/dist/ort.bundle.min.mjs",
+          "path": "vendor/food-model/ort.bundle.min.mjs",
+          "bytes": 398170,
+          "sha256": "96e80b413dda387fbcefbd2bb0015f6708323767cc0dd5383260106582e77781"
+        }
+      ]
+    }
+  ],
+  "modelFiles": [
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/config.json",
+      "sourcePath": "config.json",
+      "bytes": 4524,
+      "gitBlobSha1": "e79bad158b04c235740f9b2ec320b17f4030f7a5"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/preprocessor_config.json",
+      "sourcePath": "preprocessor_config.json",
+      "bytes": 520,
+      "gitBlobSha1": "e0675735fd0052745f2f7b7291e4aa7859389998"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/tokenizer.json",
+      "sourcePath": "tokenizer.json",
+      "bytes": 2224119,
+      "gitBlobSha1": "bc1f77d20440541dd073ebae6f6c401087c7d34e"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/tokenizer_config.json",
+      "sourcePath": "tokenizer_config.json",
+      "bytes": 775,
+      "gitBlobSha1": "c9b2a711cbdd039529fa5a66f1965e13eb14451d"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/special_tokens_map.json",
+      "sourcePath": "special_tokens_map.json",
+      "bytes": 472,
+      "gitBlobSha1": "2c2130b544c0c5a72d5d00da071ba130a9800fb2"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/vocab.json",
+      "sourcePath": "vocab.json",
+      "bytes": 862328,
+      "gitBlobSha1": "182766ce89b439768edadda342519f33802f5364"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/merges.txt",
+      "sourcePath": "merges.txt",
+      "bytes": 524619,
+      "gitBlobSha1": "76e821f1b6f0a9709293c3b6b51ed90980b3166b"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/README.md",
+      "sourcePath": "README.md",
+      "bytes": 1417,
+      "gitBlobSha1": "b6939da16da05b6e66a4f8696a360a8d7f306857"
+    },
+    {
+      "path": "models/Xenova/clip-vit-base-patch32/onnx/model_quantized.onnx",
+      "sourcePath": "onnx/model_quantized.onnx",
+      "bytes": 153695702,
+      "sha256": "0898a3facfdb27f0a041e57649b4989cfd094e4a0040d6ae75ed69917dfc7328"
+    }
+  ],
+  "localFiles": [
+    {
+      "source": "scripts/licenses/onnxruntime-LICENSE.txt",
+      "path": "vendor/food-model/onnxruntime-LICENSE.txt",
+      "bytes": 1073,
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    }
+  ]
+}

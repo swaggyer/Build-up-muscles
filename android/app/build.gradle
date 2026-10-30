@@ -19,6 +19,11 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    androidResources {
+        // Large inference resources are read directly from the APK rather than inflated into memory.
+        noCompress += ['onnx', 'wasm']
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix '.preview'
@@ -36,9 +41,75 @@ android {
 }
 
 // Every APK contains the current complete website. No remote website is used as its home page.
+tasks.register('verifyOfflineAssets') {
+    doLast {
+        File webRoot = rootProject.file('../dist').canonicalFile
+        File modelRoot = rootProject.file('../offline-model').canonicalFile
+        File manifest = new File(modelRoot, 'offline-model-manifest.json')
+        if (!manifest.isFile()) {
+            throw new GradleException('Offline model manifest is missing. Prepare and verify the bundled model before building Android.')
+        }
+        def metadata = new groovy.json.JsonSlurper().parse(manifest)
+        if (metadata.schemaVersion != 1 || !(metadata.files instanceof List) || metadata.files.isEmpty()) {
+            throw new GradleException('Offline model manifest must use schemaVersion 1 and contain a nonempty files list.')
+        }
+        if (!(metadata.revision instanceof String) || !(metadata.revision ==~ /[a-f0-9]{40}/)) {
+            throw new GradleException('Offline model revision must be pinned to a full source commit.')
+        }
+        Set<String> names = new HashSet<>()
+        int onnxCount = 0
+        int wasmCount = 0
+        int scriptCount = 0
+        metadata.files.each { entry ->
+            String name = entry.path instanceof String ? entry.path : ''
+            String hash = entry.sha256 instanceof String ? entry.sha256 : ''
+            if (!name || name.contains('\\') || name.startsWith('/') || name.split('/').any { it == '..' || it == '.' } || !names.add(name)) {
+                throw new GradleException("Unsafe or duplicate offline asset path: ${name}")
+            }
+            File webAsset = new File(webRoot, name).canonicalFile
+            File modelAsset = new File(modelRoot, name).canonicalFile
+            if (!webAsset.path.startsWith(webRoot.path + File.separator) || !modelAsset.path.startsWith(modelRoot.path + File.separator)) {
+                throw new GradleException("Offline asset escapes its source directory: ${name}")
+            }
+            if (webAsset.isFile() && modelAsset.isFile()) {
+                throw new GradleException("Duplicate offline asset in dist and offline-model: ${name}")
+            }
+            File asset = webAsset.isFile() ? webAsset : modelAsset
+            if (!asset.isFile()) {
+                throw new GradleException("Missing offline asset: ${name}")
+            }
+            if (!(entry.bytes instanceof Number) || entry.bytes.longValue() <= 0 || asset.length() != entry.bytes.longValue()) {
+                throw new GradleException("Offline asset length mismatch: ${name}")
+            }
+            if (!(hash ==~ /[a-f0-9]{64}/)) {
+                throw new GradleException("Missing pinned SHA-256 for offline asset: ${name}")
+            }
+            def digest = java.security.MessageDigest.getInstance('SHA-256')
+            asset.withInputStream { stream ->
+                byte[] buffer = new byte[1024 * 1024]
+                int read
+                while ((read = stream.read(buffer)) != -1) digest.update(buffer, 0, read)
+            }
+            if (digest.digest().encodeHex().toString() != hash) {
+                throw new GradleException("Offline asset SHA-256 mismatch: ${name}")
+            }
+            if (name.endsWith('.onnx')) onnxCount++
+            if (name.endsWith('.wasm')) wasmCount++
+            if (name.endsWith('.js') || name.endsWith('.mjs')) scriptCount++
+        }
+        if (onnxCount < 1 || wasmCount < 1 || scriptCount < 1) {
+            throw new GradleException('Offline assets must include the CLIP ONNX graph and the local JavaScript/WASM runtime.')
+        }
+        logger.lifecycle("Verified ${names.size()} pinned offline model/runtime assets before packaging.")
+    }
+}
+
 tasks.register('syncWebAssets', Sync) {
+    dependsOn 'verifyOfflineAssets'
     from(rootProject.file('../dist'))
+    from(rootProject.file('../offline-model'))
     into(layout.buildDirectory.dir('generated/web-assets/web'))
+    duplicatesStrategy = DuplicatesStrategy.FAIL
     exclude '**/*.apk', '**/*.zip'
     doFirst {
         if (!rootProject.file('../dist/index.html').isFile()) {

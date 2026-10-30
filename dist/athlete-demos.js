@@ -23,7 +23,7 @@
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const char=c=>c==='patrick'?'patrick':'spongebob';
   const usable=id=>!!global.ATHLETE_SHEETS?.[id]||global.ATHLETE_VECTOR_IDS?.includes(id);
-  global.athleteMotionInfo=id=>({...meta[id],available:usable(id)});
+  global.athleteMotionInfo=id=>({...meta[id],...global.ATHLETE_STATIC_INFO?.[id],available:usable(id)});
   global.renderAthletePortrait=function(character='spongebob'){
     const c=char(character),uid=`athlete-a-portrait-${++serial}`;
     return `<svg xmlns="http://www.w3.org/2000/svg" class="athlete-portrait" viewBox="0 0 600 680" role="img" aria-labelledby="${uid}"><title id="${uid}">A 方案${names[c]}运动员形象</title><defs><clipPath id="${uid}-clip"><rect width="600" height="680"/></clipPath></defs><g clip-path="url(#${uid}-clip)"><image href="assets/athlete-a-model.webp" width="1536" height="1024" x="${c==='patrick'?-850:-90}" y="0"/></g></svg>`;
@@ -34,6 +34,7 @@
   };
   global.renderAthleteMove=function(id,character='spongebob',still=false){
     const c=char(character),sheet=global.ATHLETE_SHEETS?.[id],info=meta[id]||meta.squat;
+    if(global.ATHLETE_STATIC_IDS?.includes(id))return global.renderAthleteVector(id,c);
     if(!sheet&&global.ATHLETE_VECTOR_IDS?.includes(id))return global.renderAthleteVector(id,c,still?0:undefined);
     if(!sheet)return `<div class="animation-unavailable" role="group" aria-label="此动作的 A 方案演示尚未完成"><div class="pending-portrait">${global.renderAthletePortrait(c)}</div><span class="pending-label">动作演示待补充</span></div>`;
     const uid=`athlete-a-move-${++serial}`,w=sheet.width/4,h=sheet.height/2,row=c==='patrick'?-h:0,dur=id==='plank'||id==='side-plank'?6.4:4.8;

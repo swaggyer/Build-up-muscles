@@ -2,7 +2,8 @@
 (function () {
   'use strict';
 
-  const WORKER_URL = new URL('photo-model-worker.js', document.currentScript ? document.currentScript.src : location.href).href;
+  const WORKER_URL = new URL('photo-model-worker.js?v=offline-v1', document.currentScript ? document.currentScript.src : location.href).href;
+  const IS_APP = location.hostname === 'appassets.androidplatform.net';
   const MAX_FILE_BYTES = 15 * 1024 * 1024;
   const OIL_KCAL_100 = 884;
   const negatives = ['a person', 'a landscape', 'a document with text', 'a cartoon character', 'an animal', 'a non-food object'];
@@ -132,7 +133,7 @@
       <input class="fpm-file" id="fpmCapture" type="file" accept="image/*" capture="environment" aria-label="拍摄食物照片">
       ${camera ? `<div class="fpm-camera"><video id="fpmCameraVideo" autoplay playsinline muted aria-label="相机预览"></video><div class="fpm-camera-actions"><button type="button" class="fpm-primary" data-fpm-shutter>拍下这顿饭</button><button type="button" class="fpm-outline" data-fpm-stop-camera>关闭相机</button></div></div>` : hasPhoto ? `<div class="fpm-photo"><img src="${esc(current.photoURL)}" alt="本次选择的餐食照片"><span>本地预览 · 不上传原图</span></div>` : `<div class="fpm-drop"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 15h9l3-6h12l3 6h9v27H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="28" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M36 21h1" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><strong>选择餐食照片</strong><p>餐盘完整入镜，一次记录一餐。</p></div>`}
       <div class="fpm-pick-actions"><button class="fpm-outline" type="button" data-fpm-camera ${current.busy ? 'disabled' : ''}>打开相机 / 拍摄</button><button class="fpm-outline" type="button" data-fpm-upload ${current.busy ? 'disabled' : ''}>${hasPhoto ? '换一张照片' : '从相册上传'}</button></div>
-      <div class="fpm-model-box"><div><b>本机食物识别</b><span>${modelReady ? '模型已就绪' : '首次需下载约 150 MB 模型。'}</span></div><button type="button" class="fpm-primary" data-fpm-analyse ${!hasPhoto || current.busy || !foods.length ? 'disabled' : ''}>${current.analysisStatus === 'success' ? '重新识别' : '下载模型并识别'}</button></div>
+      <div class="fpm-model-box"><div><b>本机食物识别</b><span>${IS_APP ? '应用内离线识别，无需联网' : modelReady ? '识别已就绪' : '照片在当前设备上分析'}</span></div><button type="button" class="fpm-primary" data-fpm-analyse ${!hasPhoto || current.busy || !foods.length ? 'disabled' : ''}>${current.analysisStatus === 'success' ? '重新识别' : '识别照片'}</button></div>
       <div id="fpmStatus" class="fpm-status ${esc(current.statusKind)}" role="status" aria-live="polite">${esc(current.status || '克重、用油需手动确认。')}</div>
       ${current.busy ? `<div class="fpm-load-row"><progress id="fpmModelProgress" max="100" ${Number.isFinite(current.progress) ? `value="${current.progress}"` : ''}></progress><button class="fpm-text" type="button" data-fpm-cancel-analysis>取消识别</button></div>` : ''}
       ${current.suggestions.length ? `<div class="fpm-suggestions"><small>其他候选食物</small><div>${current.suggestions.map(id => { const f = findFood(id); return f ? `<button type="button" data-fpm-suggest="${esc(id)}">+ ${esc(f.name)}</button>` : ''; }).join('')}</div></div>` : ''}
@@ -250,7 +251,7 @@
       current.items = [];
       current.oil = 0;
       current.confirmed = false;
-      setStatus('照片已在本机打开。点击识别后才会下载模型；也可直接手动选择食物。', 'info');
+      setStatus('照片已在本机打开。可以识别照片，也可直接手动选择食物。', 'info');
       render();
     } catch (_) {
       URL.revokeObjectURL(url);
@@ -273,7 +274,7 @@
     if (worker) return worker;
     worker = new Worker(WORKER_URL, { type: 'module', name: 'boji-local-food-recognition' });
     worker.onmessage = handleWorkerMessage;
-    worker.onerror = () => failAnalysis('本机识别程序未能启动。可能是网络或浏览器限制；没有生成识别结果。可以重试，或手动选择食物。');
+    worker.onerror = () => failAnalysis(IS_APP ? '离线识别未能启动，请重试或安装完整更新包；也可手动选择食物。' : '本机识别未能启动。可以重试，或手动选择食物。');
     worker.onmessageerror = () => failAnalysis('本机识别无法读取这张图片。请尝试另一张照片，或手动选择食物。');
     return worker;
   }
@@ -292,7 +293,7 @@
     current.runId = id;
     current.labelMap = new Map(foods.map(f => [String(f.label || f.englishName || f.id).trim(), f.id]));
     const labels = [...current.labelMap.keys(), ...negatives];
-    current.status = modelReady ? '正在本机比对食物候选，照片不会发送到服务器。' : '正在联网加载本机识别模型。首次下载较大，请保持页面打开；照片不会发送到服务器。';
+    current.status = modelReady ? '正在本机比对食物候选，照片不会发送到服务器。' : IS_APP ? '正在准备应用内离线识别，照片不会发送到服务器。' : '正在准备本机识别，照片不会发送到服务器。';
     current.statusKind = 'loading';
     render();
     try {
@@ -300,7 +301,7 @@
       activeWorker.postMessage({ id, photo: current.photo, labels });
       current.modelTimer = setTimeout(() => {
         if (current && current.runId === id && current.busy) {
-          setStatus('模型仍在加载或运行。首次可能需要数分钟；如网络较慢，可以取消并手动记餐。', 'loading');
+          setStatus('正在本机处理照片，请保持页面打开；也可取消并手动记餐。', 'loading');
         }
       }, 45000);
     } catch (_) {
@@ -318,10 +319,9 @@
         current.progress = Math.max(0, Math.min(100, data.progress));
         const bar = $('#fpmModelProgress');
         if (bar) bar.value = current.progress;
-        const file = String(data.file || '模型文件').split('/').pop();
-        setStatus(`正在下载本机模型文件 ${file}：${Math.round(current.progress)}%。照片仍在本机。`, 'loading');
+        setStatus(`${IS_APP || message.offline ? '正在准备离线识别' : '正在准备识别资源'}：${Math.round(current.progress)}%。照片仍在本机。`, 'loading');
       } else if (data.status === 'initiate' || data.status === 'download') {
-        setStatus('正在准备模型文件。首次需联网下载约150 MB，缓存后通常会更快。', 'loading');
+        setStatus(IS_APP || message.offline ? '正在读取应用内的识别资源。' : '正在准备本机识别资源。', 'loading');
       }
       return;
     }
@@ -330,11 +330,11 @@
       current.progress = 100;
       const bar = $('#fpmModelProgress');
       if (bar) bar.value = 100;
-      setStatus('模型已就绪，正在本机分析食物候选。', 'loading');
+      setStatus(message.offline ? '离线识别已就绪，正在分析食物候选。' : '正在本机分析食物候选。', 'loading');
       return;
     }
     if (message.type === 'error') {
-      failAnalysis('本机识别未完成。模型下载或浏览器计算可能受网络、内存或权限限制；本次没有生成识别结果。可以重试，或手动选择食物。');
+      failAnalysis(message.code === 'bundle-missing' ? '应用内识别资源不完整，请安装完整更新包；也可手动选择食物。' : '本机识别未完成。可以重试，或手动选择食物。');
       return;
     }
     if (message.type !== 'result') return;

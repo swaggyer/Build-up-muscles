@@ -1,16 +1,42 @@
-name: Build Android preview
+name: Android preview and checks
+
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['android/**', 'dist/**', '.github/workflows/android-build.yml']
+    paths: ['android/**', 'dist/**', 'scripts/**', 'check-*.cjs', '*model*.json', '.github/workflows/android-build.yml']
+
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: android-preview
+  cancel-in-progress: false
+
 jobs:
   android:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare verified offline model and local runtime
+        run: node scripts/prepare-offline-model.cjs
+      - name: Verify offline APK audit checks
+        run: python3 android/check-offline-audit.py
+      - name: Verify website and Android source
+        run: |
+          node check-engine.cjs
+          node check-cardio.cjs
+          node check-food-directory.cjs
+          node check-athletes.cjs
+          node check-vector.cjs
+          node check-completion.cjs
+          node check-android.cjs
+          node check-offline-model.cjs
+          node check-app-update.cjs
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -24,14 +50,40 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Check source contract
-        run: node check-android.cjs
+      - name: Reuse the preview signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: android-preview-debug-signing-v1
       - name: Compile and lint bundled application
-        run: gradle -p android --no-daemon -PappVersionCode=${{ github.run_number }} -PappVersionName=0.1.${{ github.run_number }} :app:assembleDebug :app:lintDebug
-      - name: Stage installable preview
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Build-up-muscles-android-preview.apk
+        run: gradle -p android --no-daemon -PappVersionCode=${{ github.run_number }} -PappVersionName=0.2.${{ github.run_number }} :app:assembleDebug :app:lintDebug
+      - name: Verify signed APK and package download
+        run: |
+          python3 android/audit-apk.py android/app/build/outputs/apk/debug/app-debug.apk --report baoji-boji-android-offline-audit.json
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk baoji-boji-android.apk
+          sha256sum baoji-boji-android.apk > baoji-boji-android.apk.sha256
+      - name: Compare the installed 0.1.3 signing baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p android/app/build/signing-baseline
+          gh release download android-v0.1.3 --repo swaggyer/Build-up-muscles --pattern baoji-boji-android.apk --dir android/app/build/signing-baseline
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs baoji-boji-android.apk > android/app/build/current-certificates.txt
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs android/app/build/signing-baseline/baoji-boji-android.apk > android/app/build/previous-certificates.txt
+          python3 android/compare-apk-certificates.py android/app/build/current-certificates.txt android/app/build/previous-certificates.txt --report baoji-boji-android-signing-compatibility.json --notes android/app/build/signature-note.txt
+          cat docs/release-notes.md android/app/build/signature-note.txt > android/app/build/release-notes.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: Build-up-muscles-android-preview
-          path: Build-up-muscles-android-preview.apk
+          name: baoji-boji-android
+          path: |
+            baoji-boji-android.apk
+            baoji-boji-android.apk.sha256
+            baoji-boji-android-offline-audit.json
+            baoji-boji-android-signing-compatibility.json
           if-no-files-found: error
+      - name: Publish installable Android preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "android-v0.2.${GITHUB_RUN_NUMBER}" baoji-boji-android.apk baoji-boji-android.apk.sha256 baoji-boji-android-offline-audit.json baoji-boji-android-signing-compatibility.json --target "$GITHUB_SHA" --title "暴击薄肌 Android 试用版 0.2.${GITHUB_RUN_NUMBER}" --notes-file android/app/build/release-notes.txt --latest

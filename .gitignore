@@ -4,4 +4,9 @@ android/**/build/
 *.apk
 *.jks
 *.keystore
+.cache/
+offline-model/
+dist/vendor/food-model/
 .DS_Store
+__pycache__/
+*.pyc

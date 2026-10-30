@@ -27,10 +27,20 @@ import android.window.OnBackInvokedDispatcher;
 
 import androidx.core.content.FileProvider;
 import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.JavaScriptReplyProxy;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Runs the bundled website and uses Android's camera/document apps for photos. */
 public final class MainActivity extends Activity {
@@ -41,6 +51,8 @@ public final class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> fileCallback;
     private Uri cameraUri;
+    private AppUpdateManager appUpdater;
+    private final Map<String, JavaScriptReplyProxy> updateReplies = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle state) {
@@ -76,13 +88,14 @@ public final class MainActivity extends Activity {
         settings.setMediaPlaybackRequiresUserGesture(true);
         webView.setBackgroundColor(Color.rgb(246, 244, 237));
         WebView.setWebContentsDebuggingEnabled((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        installUpdateBridge();
 
         WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this)).build();
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return loader.shouldInterceptRequest(request.getUrl());
+                return serveBundledAsset(loader, request.getUrl());
             }
 
             @Override
@@ -120,6 +133,81 @@ public final class MainActivity extends Activity {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::handleBack);
         }
+    }
+
+    private void installUpdateBridge() {
+        appUpdater = new AppUpdateManager(this, message -> runOnUiThread(() -> {
+            String id = message.optString("id", "");
+            JavaScriptReplyProxy reply = updateReplies.get(id);
+            if (reply == null || webView == null) return;
+            try {
+                reply.postMessage(message.toString());
+            } catch (IllegalStateException ignored) {
+                updateReplies.remove(id);
+            }
+            String type = message.optString("type", "");
+            if ("result".equals(type) || "error".equals(type)) updateReplies.remove(id);
+        }));
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) return;
+        WebViewCompat.addWebMessageListener(webView, "BaojiUpdater",
+                Collections.singleton("https://" + LOCAL_HOST), (view, message, origin, isMainFrame, reply) -> {
+                    if (!isMainFrame || !"https".equalsIgnoreCase(origin.getScheme())
+                            || !LOCAL_HOST.equalsIgnoreCase(origin.getHost())
+                            || (origin.getPort() != -1 && origin.getPort() != 443)) return;
+                    String raw = message.getData();
+                    if (raw == null || raw.length() > 4096) return;
+                    try {
+                        JSONObject request = new JSONObject(raw);
+                        String id = request.optString("id", "");
+                        String action = request.optString("action", "");
+                        if (!id.matches("[A-Za-z0-9._:-]{1,96}")) return;
+                        if (!("check".equals(action) || "download".equals(action)
+                                || "openInstall".equals(action) || "settings".equals(action))) {
+                            bridgeError(reply, id, action, "unsupported_action", "不支持此更新操作。");
+                            return;
+                        }
+                        if (updateReplies.containsKey(id) || updateReplies.size() >= 32) {
+                            bridgeError(reply, id, action, "request_busy", "更新操作正在进行，请稍后重试。");
+                            return;
+                        }
+                        updateReplies.put(id, reply);
+                        appUpdater.handle(id, action, request);
+                    } catch (JSONException error) {
+                        // Only bounded JSON messages from the bundled main document reach the native updater.
+                    }
+                });
+    }
+
+    private void bridgeError(JavaScriptReplyProxy reply, String id, String action, String code, String text) {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("id", id).put("action", action).put("type", "error").put("ok", false)
+                    .put("code", code).put("message", text);
+            reply.postMessage(message.toString());
+        } catch (JSONException | IllegalStateException ignored) {
+            // The requesting document may have been closed already.
+        }
+    }
+
+    private WebResourceResponse serveBundledAsset(WebViewAssetLoader loader, Uri uri) {
+        WebResourceResponse response = loader.shouldInterceptRequest(uri);
+        if (response == null || uri.getPath() == null) return response;
+        // Android's extension table may classify .mjs as text/plain. ES module imports require JS MIME.
+        String path = uri.getPath().toLowerCase(Locale.ROOT);
+        if (path.endsWith(".js") || path.endsWith(".mjs")) {
+            response.setMimeType("application/javascript");
+            response.setEncoding("UTF-8");
+        } else if (path.endsWith(".wasm")) {
+            response.setMimeType("application/wasm");
+            response.setEncoding(null);
+        } else if (path.endsWith(".onnx")) {
+            response.setMimeType("application/octet-stream");
+            response.setEncoding(null);
+        } else if (path.endsWith(".json")) {
+            response.setMimeType("application/json");
+            response.setEncoding("UTF-8");
+        }
+        return response;
     }
 
     private boolean routeNavigation(Uri uri) {
@@ -256,6 +344,8 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (appUpdater != null) appUpdater.close();
+        updateReplies.clear();
         finishFileChoice(null);
         if (webView != null) {
             webView.stopLoading();
