@@ -17,7 +17,9 @@
 https://github.com/swaggyer/Build-up-muscles/releases/latest/download/baoji-boji-android.apk
 ```
 
-Android 8.0 及以上支持安装。下载后打开 APK，按系统提示允许当前浏览器或文件管理器安装该来源的应用。当前提供调试签名的试用安装包，不是应用商店版本。若旧版与新版签名不同，系统可能拒绝覆盖安装；请先保留本机记录，不要直接卸载旧版。
+Android 8.0 及以上支持安装。下载后打开 APK，按系统提示允许当前浏览器或文件管理器安装该来源的应用。当前提供调试签名的试用安装包，不是应用商店版本。
+
+0.2.4 已通过编译、Android Lint、APK签名与完整离线资源审计，安装包约180 MB。已确认它与旧0.1.3签名不同，不能直接覆盖旧版；请保留旧App及其中记录，不要直接卸载。应用内更新会检查签名，不会绕过系统校验。本次起复用试用签名缓存，缓存丢失仍可能影响后续覆盖升级，长期发行需要妥善保管的发布签名。
 
 网页版沿用现有 Sites 访问权限，可能需要登录拥有访问权限的账号。iPhone 使用网页版；本仓库暂不提供 iOS 安装包。APK 已内置完整网页、照片识别模型和运行库，首次识别无需再下载。网页版识别仍需联网。
 
@@ -52,9 +54,10 @@ Android 8.0 及以上支持安装。下载后打开 APK，按系统提示允许�
 
 ## 本地运行
 
-无需安装前端依赖。在仓库根目录运行：
+无需安装前端依赖。在仓库根目录先准备网页识别运行库，再启动：
 
 ```sh
+node scripts/prepare-offline-model.cjs --runtime-only
 python -m http.server 4173 --directory dist
 ```
 
@@ -70,11 +73,14 @@ node check-athletes.cjs
 node check-vector.cjs
 node check-completion.cjs
 node check-android.cjs
+node check-offline-model.cjs
+node check-app-update.cjs
 ```
 
 Android 使用 JDK 17、Gradle 8.9、Android SDK 35：
 
 ```sh
+node scripts/prepare-offline-model.cjs
 gradle -p android --no-daemon :app:assembleDebug :app:lintDebug
 ```
 
